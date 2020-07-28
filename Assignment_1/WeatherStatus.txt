@@ -1,0 +1,2 @@
+The current temperature is 28.151718139648438 Degree, and it is within the comfortable range. 
+The current humidity is 21.21987533569336 Percent below the minimum humidity.
