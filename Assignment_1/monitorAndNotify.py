@@ -70,6 +70,8 @@ def create_notification(conn, notification):
 def send_notification(message):
     database = r"/home/pi/Desktop/Assignment_1/sensordata.db"
     time = datetime.date(datetime.now())
+    # check_point = ""
+    
     conn = create_connection(database)
     cur = conn.cursor()
     cur.execute("SELECT notification_date FROM notification WHERE notification_date = ?", (time,))
@@ -83,7 +85,7 @@ def send_notification(message):
             notification_id = create_notification(conn, notification)
         
     else:
-        print(".")
+        print("Today already sent")
     
 
     
@@ -105,7 +107,7 @@ def main():
                                         message text
                                     ); """
 
-    sense.show_message("Getting Sensor Data")
+    # sense.show_message("Getting Sensor Data")
 
     conn = create_connection(database)
     if conn is not None:
@@ -125,12 +127,15 @@ def add_data(cold_max,  hot_min, comfortable_min, comfortable_max, humidity_max,
     t = (t1 + t2) / 2
     t_corr = t - ((t_cpu - t) / 1.5)
     t_corr = get_smooth(t_corr)
+    temp = (round(t_corr,2))
+    humid = (round(h,2))
 
     conn = create_connection(database)
     with conn:
         print("added")
         time = datetime.now()
-        print(t_corr)
+        print("Temperature: ", temp)
+        print("Humidity: ", humid)
         message = ""
         #25
         if t_corr > hot_min:
@@ -147,8 +152,8 @@ def add_data(cold_max,  hot_min, comfortable_min, comfortable_max, humidity_max,
             message = "The humidity is too low."
             send_notification(message)
 
-        sensorReport = (time.strftime("%c"), t_corr,
-                    h)
+        sensorReport = (time.strftime("%c"), temp,
+                    humid)
         sensorReport_id = create_sensorReport(conn, sensorReport)
     
 
@@ -166,4 +171,9 @@ if __name__ == '__main__':
 while True:
     # print(get_current_time())
     add_data(limit["cold_max"],  limit["hot_min"], limit["comfortable_min"], limit["comfortable_max"], limit["humidity_max"], limit["humidity_min"])
-    sleep(5)
+    sleep(3)
+    # tempTime = datetime.now()
+    # time = tempTime.strftime("%H") + tempTime.strftime("%M")
+    # print(time)
+    
+
