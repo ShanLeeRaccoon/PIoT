@@ -10,41 +10,55 @@ app.config["DEBUG"] = True
 
 
 def dict_factory(cursor, row):
+    """ 
+    Sort data as dictionaries
+    """
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
 
 def get_last_id():
+    """
+    Getting the last id from sensorReport table
+    """
     DATABASE = r"/home/pi/Desktop/Assignment_1/sensordata.db"
     
     with sqlite3.connect(DATABASE) as con:
         cur = con.cursor()
         last_id = cur.execute('SELECT sensorReport_id FROM sensorReport ORDER BY sensorReport_id DESC LIMIT 1;').fetchone()
         return last_id
-        
+
+#API Get method (Default Route)
 @app.route('/', methods=['GET'])
 def home_route():
-    return '''<h1>Distant Reading Archive</h1>
-<p>A prototype API for distant reading of science fiction novels.</p>'''
+    return '''<h1>FuShan incorporated</h1>
+<p>A default Route.</p>'''
 
-
+#API Get Method (fetch the lastest data)
 @app.route('/sensorData', methods=['GET'])
 def api_all():
+    """
+    Connect to database and collect newest sensorReport data in dictionary form
+    """
     conn = sqlite3.connect('sensordata.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
-    all_sensorReports = cur.execute('SELECT * FROM sensorReport ORDER BY sensorReport_id DESC LIMIT 1;').fetchone()
+    newest_sensorReports = cur.execute('SELECT * FROM sensorReport ORDER BY sensorReport_id DESC LIMIT 1;').fetchone()
 
-    return jsonify(all_sensorReports)
+    return jsonify(newest_sensorReports)
 
 
-
+#Handle API Error
 @app.errorhandler(404)
 def page_not_found(e):
-    return "<h1>404</h1><p>The resource could not be found.</p>", 404
+    return "<h1>404</h1><p>FuShan Incorporated: Wrong direct.</p>", 404
+
 
 def insert_sensorData(sensorReport):
+    """
+    Add data to database
+    """
     DATABASE = r"/home/pi/Desktop/Assignment_1/sensordata.db"
     
     with sqlite3.connect(DATABASE) as con:
@@ -58,16 +72,20 @@ def insert_sensorData(sensorReport):
 
 
 
-
+#API POST method 
 @app.route("/sensorData", methods=['POST'])
 def post_sensorData():
+    """
+    Request json format temperature and humidity from user and call insert function
+    """
     if request.method == 'POST':
         temperature = request.json['temperature']     
         humidity = request.json['humidity']
         time = datetime.now()
-        # time = request.json['time']
-        
-        sensorReport = (time.strftime("%c"), temperature,
+        timeDate = time.strftime("%x")
+        timeTime = time.strftime("%X")
+        time = timeDate + " " + timeTime
+        sensorReport = (time, temperature,
                     humidity)
 
         sensorReport_id = insert_sensorData(sensorReport)
@@ -76,9 +94,12 @@ def post_sensorData():
         
         return returned_value
     else:
-        print("ripho_post fail")
+        print("post fail")
 
 def update_sensorReport(temperature, humidity):
+    """
+    Update temperature and humidity in database
+    """
     DATABASE = r"/home/pi/Desktop/Assignment_1/sensordata.db"
     
     with sqlite3.connect(DATABASE) as con:
@@ -93,16 +114,15 @@ def update_sensorReport(temperature, humidity):
         cur.execute(sql, (temperature, humidity, latest_ID))
         con.commit()
         
-
+#API PUT method
 @app.route("/sensorData", methods=["PUT"])
 def sensorData_update():
+    """
+    Request json format temperature and humidity from user and call update function
+    """
     if request.method == 'PUT':
         temperature = request.json['temperature']     
         humidity = request.json['humidity']
-        
-        # time = request.json['time']
-        
-        # sensorReport = (temperature, humidity)
 
         update_sensorReport(temperature, humidity)
 
@@ -110,56 +130,7 @@ def sensorData_update():
         
         return returned_value
     else:
-        print("ripho_update fail")
+        print("update fail")
 
-
-# @app.route("/sensorData", methods=["POST"])
-# def add_SensorData():
-#     time = request.json['time']
-#     temperature = request.json['temperature']
-#     humidity = request.json['humidity']
-
-#     new_sensorData = SensorData(time, temperature, humidity)
-
-#     db.session.add(new_SensorData)
-#     db.session.commit()
-
-#     sensorData = SensorData.query.get(new_sensorData.id)
-
-#     return sensorData_schema.jsonify(sensorData)
-
-
-# @app.route('/api/v1/resources/books', methods=['GET'])
-# def api_filter():
-#     query_parameters = request.args
-
-#     id = query_parameters.get('id')
-#     published = query_parameters.get('published')
-#     author = query_parameters.get('author')
-
-#     query = "SELECT * FROM books WHERE"
-#     to_filter = []
-
-#     if id:
-#         query += ' id=? AND'
-#         to_filter.append(id)
-#     if published:
-#         query += ' published=? AND'
-#         to_filter.append(published)
-#     if author:
-#         query += ' author=? AND'
-#         to_filter.append(author)
-#     if not (id or published or author):
-#         return page_not_found(404)
-
-#     query = query[:-4] + ';'
-
-#     conn = sqlite3.connect('books.db')
-#     conn.row_factory = dict_factory
-#     cur = conn.cursor()
-
-#     results = cur.execute(query, to_filter).fetchall()
-
-#     return jsonify(results)
-
+#start server
 app.run()

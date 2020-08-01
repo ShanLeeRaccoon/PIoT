@@ -1,18 +1,16 @@
 import csv
 import sqlite3
 from sqlite3 import Error
-from glob import glob;
+from glob import glob
 from os.path import expanduser
 from csv import writer
 from csv import reader
-
+import json
 
 
 def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by the db_file
-    :param db_file: database file
-    :return: Connection object or None
+    """
+    create connection with database with props 
     """
     conn = None
     try:
@@ -22,13 +20,10 @@ def create_connection(db_file):
 
     return conn
 
-def select_all_tasks(conn):
+def select_time_temp(conn):
     """
-    Query all rows in the tasks table
-    :param conn: the Connection object
-    :return:
+    Select all time and temperature data from sensorReport table
     """
-    # conn.row_factory = sqlite3.Row
     cur_time = conn.cursor()
     cur_temp = conn.cursor()
     cur_time.execute("SELECT time FROM sensorReport")
@@ -37,8 +32,6 @@ def select_all_tasks(conn):
     report_time = cur_time.fetchall()
     report_temp = cur_temp.fetchall()
 
-    # for x in report:
-    #     print(x)
     status = status_handler(report_temp)
     create_CSV(report_time, status)
     
@@ -46,28 +39,16 @@ def select_all_tasks(conn):
 
    
 def create_CSV(report_time, status):
-    
+    """
+    Create CSV file with headers and add report time and cordinating temperature status(prosp)
+    """
+    #initialize a csv file with time column
     with open("report_init.csv", "w", newline='') as csv_file: 
         csv_writer = csv.writer(csv_file)
-        
         csv_writer.writerow(["Date","Status"])
         csv_writer.writerows(report_time)
-
-
-        # for x in report:
-        #     print(report[0])
-        # for x in report:
-        #     csv_writer.writerow(report["time"])
-        # csv_writer.writerow([report_time[0] for i in report_time]) # write headers
-        
-        # csv_writer.writerows(report_time)
-        
-       
-        # csv_writer.writerows(report_time)
         print("creating")
-   
-    
-
+    #create main csv file according to the initial csv file
     with open('report_init.csv', 'r') as read_obj, \
             open('report.csv', 'w', newline='') as write_obj:
         csv_reader = reader(read_obj)
@@ -76,11 +57,7 @@ def create_CSV(report_time, status):
         next(csv_reader, None)
         csv_writer.writerow(["Date","Status"])
         for row in csv_reader:
-        # Append the default text in the row / list
-            
-            # print(index)
             row.append(status[index])
-        # Add the updated row / list to the output file
             csv_writer.writerow(row)
             index = index + 1
 
@@ -90,16 +67,19 @@ def create_CSV(report_time, status):
 
 
 def status_handler(temperature_list):
+    """
+    return a list of temperature status, compared with config json
+    """
     status = []
     for x in temperature_list:
         a = x[0]
         b = (round(a,1))
         c = int(b)
         
-        if c < 10:
-            status.append("BAD:" + str(10-c) +" below the comfort temperature")
-        elif c > 25:
-            status.append("BAD:" + str(c-25) +" above the comfort temperature")
+        if c < limit["comfortable_min"]:
+            status.append("BAD:" + str(limit["comfortable_min"]-c) +" below the comfort temperature")
+        elif c > limit["comfortable_max"]:
+            status.append("BAD:" + str(c-limit["comfortable_max"]) +" above the comfort temperature")
         else:
             status.append("OK")
     return status
@@ -111,18 +91,24 @@ def status_handler(temperature_list):
 
 
 
-def main():
+def connect_to_database():
+    """
+    Establish initial connection to database and trigger select time and temperature function
+    """
     database = r"/home/pi/Desktop/Assignment_1/sensordata.db"
 
     # create a database connection
     conn = create_connection(database)
     with conn:
-        select_all_tasks(conn)
+        select_time_temp(conn)
 
-
-
+#Read json config file for temperature limit/ range
+with open("config.json", "r") as read_file:
+    print("Reading config.json")
+    limit = json.load(read_file)
+#Start main program
 if __name__ == '__main__':
-    main()
+    connect_to_database()
     
 
 

@@ -1,6 +1,8 @@
 from sense_hat import SenseHat
 from time import sleep
 sense = SenseHat()
+
+#Defining the color attributes used for this task
 y = (255, 255, 0) #Yellow
 b = (0, 0, 0) # Black
 lg = (12,147,46) #light green
@@ -16,6 +18,7 @@ w = (255, 255, 255) #white
 gr = (50, 50, 50)#gray
 
 
+#Eggplant Emoji
 eggplant_not_face = [
    b, b, b, b, b, lg, b, b,
    b, b, b, b, g, lg ,g, b,
@@ -27,6 +30,7 @@ eggplant_not_face = [
    b, b, b, b, b, b, b, b,
 ]
 
+#Angry face emoji
 angry_face = [
    y, r, r, r, r, r, r, y,
    r, y, r, r, r, r, y, r,
@@ -37,6 +41,8 @@ angry_face = [
    y, r, w, r, w, r, w, y,
    r, y, y, y, y, y, y, r
 ]
+
+#creeper(minecraft character) face emoji
 creeper_face = [
    dg, g, lg, g, g, g, g, g,
    g, g, g, g, dg, lg, lg, g,
@@ -47,12 +53,12 @@ creeper_face = [
    g, g, b, b, b, b, g, g,
    g, lg, b, dg, g, b, dg, lg
 ]
+
+#main script to cycle through 3 emojis with 3 seconds sleep time
 while True:
    sense.set_pixels(angry_face)
    sleep(3)
    sense.set_pixels(eggplant_not_face)
    sleep(3)
    sense.set_pixels(creeper_face)
-
-   
    sleep (3)
