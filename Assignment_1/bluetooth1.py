@@ -68,7 +68,7 @@ def write_report(temp, humid):
     """
     print(humid)
     print(temperature)
-    f = open("WeatherStatus.txt", "w")
+    f = open("/home/pi/Desktop/Assignment_1/WeatherStatus.txt", "w")
 
 
     if temp < limit["min_temperature"]:
@@ -108,7 +108,7 @@ nearby_devices = bluetooth.discover_devices()
 sense = SenseHat()
 
 #opening a json config file to read containing temperature, humidity limits/ range 
-with open("config_min_max.json", "r") as read_file:
+with open("/home/pi/Desktop/Assignment_1/config_min_max.json", "r") as read_file:
     print("Reading config.json")
     limit = json.load(read_file)
 

@@ -43,6 +43,6 @@ def update_lastest_sensor_data(humidity, temperature):
 
 get_newest_data()
 
-post_sensor_data(99,46)
-update_lastest_sensor_data(69,46)
+#post_sensor_data(99,46)
+#update_lastest_sensor_data(69,46)
 

@@ -214,6 +214,7 @@ def check_and_create_table():
     Start the program by checking if the following tables exist, 
     if not create a new table, else it will proceed the python program
     """
+    # sense.show_message("Gathering Data")
     database = r"/home/pi/Desktop/Assignment_1/sensordata.db"
     sql_create_sensorReport_table = """ CREATE TABLE IF NOT EXISTS sensorReport (
                                         sensorReport_id integer PRIMARY KEY,
@@ -237,17 +238,34 @@ def check_and_create_table():
 checkpoint = "2329"
 sense = SenseHat()
 #opening a json config file to read containing temperature, humidity limits/ range 
-with open("config.json", "r") as read_file:
+with open("/home/pi/Desktop/Assignment_1/config.json", "r") as read_file:
     print("Reading config.json")
     limit = json.load(read_file)
 
 #run table checking a program startup
 check_and_create_table()
-
+x = True
+y = 4
 #start main program with a 60 second interval adding new sensor data, and trigger send daily notification function when the current time is 11:59PM
 while True:
+    
+    if x:
+        for i in range(y):
+            t1 = sense.get_temperature_from_humidity()
+            t2 = sense.get_temperature_from_pressure()
+            t_cpu = get_cpu_temp()
+            h = sense.get_humidity()
+            t = (t1 + t2) / 2
+            t_corr = t - ((t_cpu - t) / 1.5)
+            t_corr = get_smooth(t_corr)
+            
+        x = False
+    
+        
+        
+        
     add_data(limit["cold_max"],  limit["hot_min"], limit["comfortable_min"], limit["comfortable_max"], limit["humidity_max"], limit["humidity_min"])
-    sleep(3)
+    sleep(60)
     tempTime = datetime.now()
     time = tempTime.strftime("%H") + tempTime.strftime("%M")
     print("The current time is " + time)

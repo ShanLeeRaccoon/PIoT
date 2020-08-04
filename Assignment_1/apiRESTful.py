@@ -41,7 +41,7 @@ def api_all():
     """
     Connect to database and collect newest sensorReport data in dictionary form
     """
-    conn = sqlite3.connect('sensordata.db')
+    conn = sqlite3.connect('/home/pi/Desktop/Assignment_1/sensordata.db')
     conn.row_factory = dict_factory
     cur = conn.cursor()
     newest_sensorReports = cur.execute('SELECT * FROM sensorReport ORDER BY sensorReport_id DESC LIMIT 1;').fetchone()
